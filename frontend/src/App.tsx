@@ -18,7 +18,7 @@ const MainMenu = () => (
       
       <div className="flex justify-center gap-6 text-sm">
         <a 
-          href="#video-link"
+          href="https://www.loom.com/share/c16e82f1fd80477aa2f857acc271a6f4?sid=6ea2c86a-e84e-40ff-88e3-d9e2ab7edb6c"
           className="text-blue-600 hover:text-blue-800 transition-colors"
           target="_blank" 
           rel="noopener noreferrer"
