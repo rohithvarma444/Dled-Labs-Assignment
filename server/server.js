@@ -29,6 +29,9 @@ const connectDB = async () => {
 };
 connectDB();
 
+app.get('/', (req, res) => {
+  res.send('Welcome to the Dled Labs Assignment API');
+});
 app.use('/api', require('./routes/api'));
 
 app.listen(3000, () => {
