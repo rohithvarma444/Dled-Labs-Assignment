@@ -5,8 +5,8 @@ const FocusLossEventSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  timestamp: {
-    type: Date,
+  timeStamp: {
+    type: String,
     required: true
   },
   durationSeconds: {

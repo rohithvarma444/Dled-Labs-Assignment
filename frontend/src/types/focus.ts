@@ -1,6 +1,6 @@
 export interface FocusLossEvent{
     sessionId: string | null,
-    timeStamp: number | null,
+    timeStamp: string | null,
     durationSeconds: number,
 }
 

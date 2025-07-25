@@ -2,8 +2,7 @@ import React, { useEffect } from 'react';
 import { useFocusStore } from '../store/focusStore';
 
 const SessionReportDisplay: React.FC = () => {
-  const { switchCount, totalTimeAwaySeconds, trustScore } = useFocusStore();
-  console.log(switchCount,totalTimeAwaySeconds);
+  const { switchCount, totalTimeAwaySeconds, trustScore, resetSession } = useFocusStore();
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -11,15 +10,19 @@ const SessionReportDisplay: React.FC = () => {
     return `${minutes}m ${remainingSeconds}s`;
   };
 
+  const handleStartNewSession = () => {
+    resetSession();
+  };
+
   return (
-    <div className="flex w-full bg-white items-center min-h-screen bg-white-100 ">
+    <div className="flex w-full bg-white items-center justify-center min-h-screen">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-sm text-center">
         <h2 className="text-2xl font-bold mb-4">Session Report</h2>
         <div className="mb-6">
           <p className="text-6xl font-bold text-blue-600">{trustScore}</p>
           <p className="text-gray-500">Trust Score</p>
         </div>
-        <div className="flex justify-around">
+        <div className="flex justify-around mb-6">
           <div>
             <p className="text-3xl font-bold text-black">{switchCount}</p>
             <p className="text-gray-500">Switches</p>
@@ -29,6 +32,12 @@ const SessionReportDisplay: React.FC = () => {
             <p className="text-gray-500">Time Away</p>
           </div>
         </div>
+        <button
+          onClick={handleStartNewSession}
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors"
+        >
+          Start New Session
+        </button>
       </div>
     </div>
   );
@@ -46,11 +55,9 @@ export const FocusTracker: React.FC = () => {
   } = useFocusStore();
 
   useEffect(() => {
-    if (!sessionId) {
+    if (!sessionId && !isSessionOver) {
       startSession();
     }
-
-    if (isSessionOver) return;
 
     const { handleBlur, handleFocus } = useFocusStore.getState();
     window.addEventListener('blur', handleBlur);

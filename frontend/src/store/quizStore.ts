@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import type { Question, QuizAnswer } from '../types/quiz';
 
 interface QuizState {
@@ -25,21 +24,21 @@ interface QuizState {
 const questions: Question[] = [
   {
     id: 1,
-    question: "What is React used for?",
-    options: ["Building UIs", "Databases", "Servers", "Files"],
-    answer: "Building UIs"
+    question: "What is the capital of India?",
+    options: ["Delhi", "Visakhapatnam", "Hyderabad", "Kochi"],
+    answer: "Delhi"
   },
   {
     id: 2,
-    question: "What does JSX mean?",
-    options: ["JavaScript XML", "Java Extension", "JSON XML", "JS Extra"],
-    answer: "JavaScript XML"
+    question: "Which OS is best?",
+    options: ["MacOS", "Linux", "Windows", "Arch Linux"],
+    answer: "MacOS"
   },
   {
     id: 3,
-    question: "Which hook manages state?",
-    options: ["useEffect", "useState", "useContext", "useRef"],
-    answer: "useState"
+    question: "What does i = cnt++ opeator do in C++?",
+    options: ["Use and Increase", "Increase and Use", "Increase", "Decrease"],
+    answer: "Use and Increase"
   }
 ];
 
@@ -121,16 +120,22 @@ export const useQuizStore = create<QuizState>(
         set({ videoProgress: progressSeconds });
 
         const currentPercent = (progressSeconds / state.videoDuration) * 100;
-        const triggers = [25, 50, 75];
+        const triggers = [
+          { percent: 25, questionId: 1 },
+          { percent: 50, questionId: 2 },
+          { percent: 75, questionId: 3 }
+        ];
         
         for (const trigger of triggers) {
-          if (currentPercent >= trigger && !state.triggeredPercentages.has(trigger) && !state.showQuiz) {
-            console.log(`Quiz triggered at ${trigger}%`);
-            const randomQ = questions[Math.floor(Math.random() * questions.length)];
-            get().showQuizModal(randomQ, progressSeconds);
-            set(prevState => ({
-              triggeredPercentages: new Set(prevState.triggeredPercentages).add(trigger)
-            }));
+          if (currentPercent >= trigger.percent && !state.triggeredPercentages.has(trigger.percent) && !state.showQuiz) {
+            console.log(`Quiz triggered at ${trigger.percent}%`);
+            const question = questions.find(q => q.id === trigger.questionId);
+            if (question) {
+              get().showQuizModal(question, progressSeconds);
+              set(prevState => ({
+                triggeredPercentages: new Set(prevState.triggeredPercentages).add(trigger.percent)
+              }));
+            }
             break;
           }
         }

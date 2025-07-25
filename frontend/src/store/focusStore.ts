@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { SessionReport, FocusLossEvent } from '../types/focus';
 
-
 interface FocusState {
   sessionId: string | null;
   sessionStartTime: number | null;
@@ -20,6 +19,7 @@ interface FocusState {
   handleBlur: () => void;
   handleFocus: () => void;
   endSession: () => void;
+  resetSession: () => void;
 }
 
 export const useFocusStore = create(
@@ -27,7 +27,7 @@ export const useFocusStore = create(
     (set, get) => ({
       sessionId: null,
       sessionStartTime: null,
-      durationLeft: 600,
+      durationLeft: 120,
       isPageFocused: true,
       switchCount: 0,
       totalTimeAwaySeconds: 0,
@@ -41,11 +41,29 @@ export const useFocusStore = create(
         set({
           sessionId: `focus_session_${Date.now()}`,
           sessionStartTime: Date.now(),
-          durationLeft: 600,
+          durationLeft: 120,
           isSessionOver: false,
           switchCount: 0,
           totalTimeAwaySeconds: 0,
           trustScore: 100,
+          focusLossHistory: [],
+          isPageFocused: true,
+          lastBlurTimestamp: null,
+        });
+      },
+
+      resetSession: () => {
+        set({
+          sessionId: null,
+          sessionStartTime: null,
+          durationLeft: 120,
+          isSessionOver: false,
+          switchCount: 0,
+          totalTimeAwaySeconds: 0,
+          trustScore: 100,
+          focusLossHistory: [],
+          isPageFocused: true,
+          lastBlurTimestamp: null,
         });
       },
       
@@ -82,19 +100,18 @@ export const useFocusStore = create(
 
         const state = get();
 
-
         const currentFocusLossEvent : FocusLossEvent = {
             sessionId: state.sessionId,
-            timeStamp: state.lastBlurTimestamp,
+            timeStamp: new Date(state.lastBlurTimestamp!).toLocaleString(),
             durationSeconds: durationSeconds,
         }
         
         set(state => ({
           totalTimeAwaySeconds: state.totalTimeAwaySeconds + durationSeconds,
-          focusLossHistory: [...state.focusLossHistory,currentFocusLossEvent]
+          focusLossHistory: [...state.focusLossHistory,currentFocusLossEvent],
+          isPageFocused: true,
+          lastBlurTimestamp: null
         }));
-        
-        set({ isPageFocused: true, lastBlurTimestamp: null });
       },
 
       endSession: () => {
@@ -103,8 +120,6 @@ export const useFocusStore = create(
         console.log('Session ended. Calculating final score.');
         const score = 100 - (state.switchCount * 10 + state.totalTimeAwaySeconds * 0.5);
         const finalTrustScore = Math.max(0, Math.round(score));
-
-        set({ trustScore: finalTrustScore, isSessionOver: true });
 
         const report: SessionReport = {
           sessionId: state.sessionId!,
@@ -115,12 +130,13 @@ export const useFocusStore = create(
         };
 
         console.log("------->",report,"<------------");
-
         fetch('http://localhost:3000/api/session-summary', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(report),
         }).catch(() => console.log('Could not send session summary to API.'));
+
+        set({ trustScore: finalTrustScore, isSessionOver: true });
       },
     }),
     {
@@ -129,7 +145,10 @@ export const useFocusStore = create(
       onRehydrateStorage: () => (state) => {
         if (state && !state.isSessionOver && state.sessionStartTime) {
           const elapsedTime = Math.floor((Date.now() - state.sessionStartTime) / 1000);
-          state.durationLeft = Math.max(0, 600 - elapsedTime);
+          state.durationLeft = Math.max(0, 120 - elapsedTime);
+          if (state.durationLeft <= 0) {
+            state.isSessionOver = true;
+          }
         }
       },
     }
