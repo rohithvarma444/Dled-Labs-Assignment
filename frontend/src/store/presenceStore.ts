@@ -131,7 +131,7 @@ export const usePresenceStore = create(
           responseTime: null,
           status: 'missed',
         };
-        fetch('http://localhost:3000/api/presence-check', {
+        fetch('https://dled-labs-assignment.onrender.com/api/presence-check', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(promptData),

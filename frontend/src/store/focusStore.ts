@@ -130,7 +130,7 @@ export const useFocusStore = create(
         };
 
         console.log("------->",report,"<------------");
-        fetch('http://localhost:3000/api/session-summary', {
+        fetch('https://dled-labs-assignment.onrender.com/api/session-summary', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(report),

@@ -99,7 +99,7 @@ export const useQuizStore = create<QuizState>(
           videoTimestamp: state.videoProgress
         };
 
-        fetch('http://localhost:3000/api/quiz-response', {
+        fetch('https://dled-labs-assignment.onrender.com/api/quiz-response', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newAnswer),
